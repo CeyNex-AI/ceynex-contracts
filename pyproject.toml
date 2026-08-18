@@ -42,6 +42,15 @@ target-version = "py311"
 select = ["E", "F", "I", "UP", "B", "SIM", "N"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+# UP035 rewrites `from typing_extensions import NotRequired` to `from typing
+# import NotRequired`, because NotRequired is in typing from 3.11 and this
+# project targets py311. That rewrite is wrong here on purpose: the contracts
+# import it from typing_extensions so the package stays importable under 3.10,
+# which is the interpreter at least one member's tests have been running on.
+# Without this ignore, `make fmt` silently breaks a frozen file.
+"ceynex/contracts/*.py" = ["UP035"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --strict-markers"

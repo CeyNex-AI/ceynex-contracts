@@ -42,7 +42,7 @@ def test_both_schemas_are_installed_package_data():
 def test_sql_declares_every_contracted_table():
     sql = read("schema.sql").lower()
     declared = set(re.findall(r"create table(?:\s+if not exists)?\s+(\w+)", sql))
-    assert FACT_TABLES <= declared, f"missing: {FACT_TABLES - declared}"
+    assert declared >= FACT_TABLES, f"missing: {FACT_TABLES - declared}"
 
 
 def test_fact_trade_carries_both_country_coding_standards():
