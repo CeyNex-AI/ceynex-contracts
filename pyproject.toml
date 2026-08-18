@@ -1,0 +1,47 @@
+[project]
+name = "ceynex-contracts"
+version = "0.1.0"
+description = "CeyNex frozen interfaces — agent state, evidence, forecasts, connector/model protocols, and the Postgres + Neo4j schemas"
+requires-python = ">=3.11"
+dependencies = [
+    # protocols.py annotates fetch() -> pd.DataFrame at runtime, so pandas is a
+    # real import, not a type-checking one. Changing that is a contract edit.
+    "pandas>=2.2",
+    # NotRequired lands in typing at 3.11; importing it from here keeps the
+    # package importable under 3.10 for anyone on an older interpreter.
+    "typing-extensions>=4.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.5",
+    "pre-commit>=3.7",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# `ceynex` is an implicit namespace package: this distribution supplies
+# ceynex.contracts, ceynex-core supplies ceynex.data / .kg / .agents / ...
+# Neither ships a ceynex/__init__.py — adding one back shadows the other
+# distribution and breaks every import in the team's code.
+[tool.setuptools.packages.find]
+include = ["ceynex.contracts*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"ceynex.contracts" = ["schema/*.sql", "schema/*.cypher", "CLAUDE.md"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "N"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"

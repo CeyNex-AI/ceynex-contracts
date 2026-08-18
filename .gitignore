@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Local working notes — the tracked guidance is README.md and
+# ceynex/contracts/CLAUDE.md, which guards the frozen package.
+/CLAUDE.md
