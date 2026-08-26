@@ -12,3 +12,13 @@ build/
 # Local working notes — the tracked guidance is README.md and
 # ceynex/contracts/CLAUDE.md, which guards the frozen package.
 /CLAUDE.md
+
+# EDB permission/contact documents — personal/admin material, never committed.
+/Contact Export Development Board*.html
+/Contact Export Development Board*_files/
+/Dr.Chathuranga Hettiarachchi*.html
+/Dr.Chathuranga Hettiarachchi*_files/
+/EDB_Permission_Email.txt
+/EDB_Permission_Letter.txt
+/CeyNex - EDB Permission Email.docx
+/CeyNex - EDB Permission Request Letter.docx
