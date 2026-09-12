@@ -1,0 +1,58 @@
+# ceynex-contracts CI: lint and the test suite.
+#
+# No integration job -- this package is the frozen interfaces (agent state,
+# evidence, forecast and protocol contracts, the Postgres + Neo4j schemas as
+# package data) with no database or network dependency of its own; `pytest`
+# alone covers it, on both Python versions ceynex-core supports.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      # Pinned to the version this tree is verified clean with -- see
+      # ceynex-core's ci.yml for why (pyproject's own `ruff>=0.5` would float).
+      - run: pip install ruff==0.16.3
+      - run: ruff check --output-format=github .
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor pyproject.toml declares (NotRequired); 3.12 is
+        # what ceynex-core's own venvs and the backend image run.
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install -e ".[dev]"
+      - run: pytest -rfE
