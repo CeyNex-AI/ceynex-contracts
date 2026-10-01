@@ -1,8 +1,9 @@
 // CeyNex knowledge graph — constraints and indexes.  FROZEN CONTRACT.
 //
 // SRS 3.10.1 (graph database schema), SAD §5.2 Knowledge Graph package and
-// §9, team overview §4.3.  Six node types, four relationship types; the SAD
-// says "do not improvise", so a loader that needs a new label or edge type
+// §9, team overview §4.3.  Seven node types: the SAD's six, plus PolicyDocument,
+// added by contract change for deviation D10 (policy-document retrieval). The
+// SAD says "do not improvise", so a loader that needs a new label or edge type
 // raises a contract change rather than adding one.
 //
 // Applied by `ceynex.kg.load` (see also `make kg-load`), never by hand and
@@ -38,6 +39,18 @@ CREATE CONSTRAINT district_name IF NOT EXISTS
 CREATE CONSTRAINT trade_agreement_name IF NOT EXISTS
   FOR (t:TradeAgreement) REQUIRE t.name IS UNIQUE;
 
+// --- Policy documents -----------------------------------------------------
+// SRS 3.1.9, deviation D10 (ceynex-core docs/CONTRACT_PROPOSAL_POLICY_DOCUMENT.md).
+// The node is a POINTER, not the text: doc_id, provenance, and which Qdrant
+// collection holds the document's chunks. The text lives only in Qdrant. The
+// graph answers "which documents could possibly be relevant" in Cypher, before
+// any vector search runs: an unanchored similarity search over trade-policy
+// text returns the right topic from the wrong country, because these documents
+// all read alike. Edges: (:PolicyDocument)-[:ISSUED_BY]->(:Country),
+// -[:APPLIES_TO]->(:HSCode), -[:DESCRIBES]->(:TradeAgreement).
+CREATE CONSTRAINT policy_document_id IF NOT EXISTS
+  FOR (p:PolicyDocument) REQUIRE p.doc_id IS UNIQUE;
+
 // --- Lookup indexes -------------------------------------------------------
 // Country.name and HSCode.description back the "which country / what is this
 // code" lookups the router does before it can parameterize a query.
@@ -46,6 +59,10 @@ CREATE INDEX country_name IF NOT EXISTS
 
 CREATE INDEX hscode_description IF NOT EXISTS
   FOR (h:HSCode) ON (h.description);
+
+// policy_documents_for() filters on the issuing country before anything else.
+CREATE INDEX policy_document_iso3 IF NOT EXISTS
+  FOR (p:PolicyDocument) ON (p.iso3);
 
 // --- Relationship indexes -------------------------------------------------
 // Every Export Analytics query filters EXPORTS_TO by year: cagr() bounds a
