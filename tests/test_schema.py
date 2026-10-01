@@ -23,6 +23,8 @@ NODE_LABELS = {
     "District",
     "HSCode",
     "TradeAgreement",
+    # Added by contract change for D10 (ceynex-core CONTRACT_PROPOSAL_POLICY_DOCUMENT.md).
+    "PolicyDocument",
 }
 
 FACT_TABLES = {"dim_country", "dim_hs", "fact_trade", "dq_flag", "ingest_run"}
