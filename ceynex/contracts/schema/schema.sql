@@ -43,6 +43,27 @@ CREATE INDEX IF NOT EXISTS ix_fact_trade_sector      ON fact_trade (sector);
 CREATE INDEX IF NOT EXISTS ix_fact_trade_partner     ON fact_trade (partner_iso3);
 CREATE INDEX IF NOT EXISTS ix_fact_trade_hash        ON fact_trade (source_hash);
 
+-- Per-observation provenance.  fact_trade remains the normalized numeric fact;
+-- this table records the workbook location and original publisher supporting it.
+-- The locator is intentionally stable across re-ingestion, while the mutable
+-- source details are refreshed when an upstream workbook is revised.
+CREATE TABLE IF NOT EXISTS fact_provenance (
+  provenance_id   BIGSERIAL PRIMARY KEY,
+  record_id        BIGINT NOT NULL REFERENCES fact_trade(record_id) ON DELETE CASCADE,
+  publisher        TEXT,
+  source_file      TEXT,
+  source_url       TEXT,
+  workbook_file    TEXT NOT NULL,
+  workbook_sha256  TEXT NOT NULL,
+  source_sheet     TEXT NOT NULL,
+  source_row       INTEGER NOT NULL CHECK (source_row > 0),
+  ingested_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (record_id, workbook_file, source_sheet, source_row)
+);
+
+CREATE INDEX IF NOT EXISTS ix_fact_provenance_record
+  ON fact_provenance (record_id);
+
 -- Cross-validation discrepancies: FLAG, never drop (SRS 3.1.8).
 -- Both conflicting source rows stay in fact_trade; this table records that they disagree.
 CREATE TABLE IF NOT EXISTS dq_flag (
