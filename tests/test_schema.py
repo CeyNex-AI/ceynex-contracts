@@ -27,7 +27,7 @@ NODE_LABELS = {
     "PolicyDocument",
 }
 
-FACT_TABLES = {"dim_country", "dim_hs", "fact_trade", "dq_flag", "ingest_run"}
+FACT_TABLES = {"dim_country", "dim_hs", "fact_trade", "fact_provenance", "dq_flag", "ingest_run"}
 
 
 def read(name: str) -> str:
@@ -57,6 +57,14 @@ def test_fact_trade_carries_both_country_coding_standards():
 def test_fact_trade_keeps_its_idempotency_key():
     """The writer upserts on source_hash; losing it silently duplicates rows."""
     assert "source_hash" in read("schema.sql").lower()
+
+
+def test_fact_provenance_references_a_fact_and_keeps_workbook_identity():
+    sql = read("schema.sql").lower()
+    assert "fact_provenance" in sql
+    assert "references fact_trade(record_id) on delete cascade" in sql
+    for column in ("workbook_file", "workbook_sha256", "source_sheet", "source_row"):
+        assert column in sql
 
 
 def test_cypher_constrains_exactly_the_contracted_labels():
