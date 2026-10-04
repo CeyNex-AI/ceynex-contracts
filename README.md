@@ -120,4 +120,4 @@ CI (`.github/workflows/ci.yml`) runs ruff and pytest on every push and pull requ
 
 ## Team
 
-Senindu Dinapura (230151T), Thisen Ekanayake (230170B), Dhinanjaya Fernando (230181J). Supervisor: Dr. Chathuranga Hettiarachchi, University of Moratuwa.
+Senindu Dinapura (230151T), Thisen Ekanayake (230170B), Dhinanjaya Fernando (230181J). Supervisor: Dr. Chathuranga Hettiarachchi. Teaching Assistant: Birunthaban Rajendram. University of Moratuwa.
